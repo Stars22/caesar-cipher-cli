@@ -10,3 +10,6 @@ program
   .requiredOption("-a, --action", "an action encode/decode");
 
 program.parse(process.argv);
+
+const shift = program.shift;
+const input = program.input;
