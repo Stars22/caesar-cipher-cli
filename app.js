@@ -2,7 +2,13 @@ const { program } = require("commander");
 const stream = require("stream");
 const util = require("util");
 const fs = require("fs");
+
 const Cipher = require("./CipherTransform");
+
+function handleStreamError(error) {
+  console.error(error.message);
+  process.exit();
+}
 
 program
   .requiredOption("-s, --shift <number>", "a shift")
@@ -16,16 +22,16 @@ const { shift, input, output, actions } = program;
 const outputExist = fs.existsSync(output);
 const inputExist = fs.existsSync(input);
 const inputStream = inputExist
-  ? fs.createReadStream(input)
+  ? fs.createReadStream(input).on("error", handleStreamError)
   : stream.Readable.from(input);
 const outputStream = outputExist
-  ? fs.createWriteStream(output)
+  ? fs.createWriteStream(output).on("error", handleStreamError)
   : process.stdout;
 const pipeline = util.promisify(stream.pipeline);
 
 async function run() {
   await pipeline(inputStream, new Cipher(shift, actions), outputStream);
-  console.log("Pipeline succeeded.");
+  console.log("The data was ciphered");
 }
 
 run().catch(console.error);
