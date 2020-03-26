@@ -2,7 +2,7 @@ const { program } = require("commander");
 const stream = require("stream");
 const util = require("util");
 const fs = require("fs");
-const caesarCipher = require("./caesarCipher");
+const Cipher = require("./CipherTransform");
 
 program
   .requiredOption("-s, --shift <number>", "a shift")
@@ -13,29 +13,18 @@ program
 program.parse(process.argv);
 
 const { shift, input, output, actions } = program;
-
+const outputExist = fs.existsSync(output);
+const inputExist = fs.existsSync(input);
+const inputStream = inputExist
+  ? fs.createReadStream(input)
+  : stream.Readable.from(input);
+const outputStream = outputExist
+  ? fs.createWriteStream(output)
+  : process.stdout;
 const pipeline = util.promisify(stream.pipeline);
 
-class Cipher extends stream.Transform {
-  constructor(shift, action) {
-    super();
-    this.shift = shift;
-    this.action = action;
-  }
-  _transform(chunk, enc, finishCb) {
-    const data = chunk.toString();
-    const encodedChunk = caesarCipher(data, this.shift, this.action);
-    this.push(encodedChunk);
-    finishCb();
-  }
-}
-
 async function run() {
-  await pipeline(
-    fs.createReadStream(input),
-    new Cipher(shift, actions),
-    fs.createWriteStream(output)
-  );
+  await pipeline(inputStream, new Cipher(shift, actions), outputStream);
   console.log("Pipeline succeeded.");
 }
 
