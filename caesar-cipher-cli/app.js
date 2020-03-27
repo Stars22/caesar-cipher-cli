@@ -7,7 +7,7 @@ const Cipher = require("./CipherTransform");
 
 function handleStreamError(error) {
   console.error(error.message);
-  process.exit();
+  process.exit(1);
 }
 
 program
@@ -19,12 +19,10 @@ program
 program.parse(process.argv);
 
 const { shift, input, output, actions } = program;
-const outputExist = fs.existsSync(output);
-const inputExist = fs.existsSync(input);
-const inputStream = inputExist
+const inputStream = input
   ? fs.createReadStream(input).on("error", handleStreamError)
-  : stream.Readable.from(input);
-const outputStream = outputExist
+  : process.stdin;
+const outputStream = output
   ? fs.createWriteStream(output).on("error", handleStreamError)
   : process.stdout;
 const pipeline = util.promisify(stream.pipeline);

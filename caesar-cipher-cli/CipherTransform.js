@@ -6,7 +6,7 @@ class Cipher extends stream.Transform {
     this.shift = shift;
     this.action = action;
   }
-  _transform(chunk, enc, finishCb) {
+  _transform(chunk, _, finishCb) {
     const data = chunk.toString();
     const encodedChunk = caesarCipher(data, this.shift, this.action);
     this.push(encodedChunk);
