@@ -23,7 +23,7 @@ const inputStream = input
   ? fs.createReadStream(input).on("error", handleStreamError)
   : process.stdin;
 const outputStream = output
-  ? fs.createWriteStream(output).on("error", handleStreamError)
+  ? fs.createWriteStream(output, { flags: "a" }).on("error", handleStreamError)
   : process.stdout;
 const pipeline = util.promisify(stream.pipeline);
 
